@@ -1,23 +1,16 @@
-# ICO-AR-001: Edificio B WebAR
+# ICO-AR-001 — Edificio B en Realidad Aumentada
 
-## Incluye
-- `index.html`: página WebAR MindAR + A-Frame.
-- `assets/EdificioB.glb`: modelo 3D conceptual generado para este prototipo.
-- `assets/marcador.png`: marcador de imagen de prueba.
-- `assets/QR_ID.png`: QR de identificación del proyecto (no es URL).
-- `assets/Code128_ID.png`: código Code 128 de identificación (no es URL).
+Prototipo WebAR MindAR + A-Frame que intenta mostrar el modelo conceptual al reconocer una imagen.
 
-## Pendiente imprescindible
-`assets/targets.mind` todavía NO está incluido. Debe compilarse desde `assets/marcador.png` con el compilador MindAR; sin él no funcionará el image tracking.
+## Contenido
+- `index.html`: página WebAR.
+- `assets/EdificioB.glb`: modelo 3D conceptual.
+- `assets/marcador.png`: marcador de referencia.
+- `assets/targets.mind`: archivo recibido y validado estructuralmente (MindAR v2, 1 target, 1200x900 px).
+- `assets/QR_ID.png` y `assets/Code128_ID.png`: códigos identificadores preliminares.
 
-## Compilar targets.mind
-1. Abrir https://hiukim.github.io/mind-ar-js-doc/tools/compile/ .
-2. Cargar `assets/marcador.png` y compilar.
-3. Descargar y renombrar el archivo como `targets.mind`.
-4. Colocarlo en la carpeta `assets/`.
+## Publicación
+Sube los archivos conservando `assets/`. Activa GitHub Pages desde rama `main`, carpeta root. El sitio necesita HTTPS y permisos de cámara.
 
-## Publicar
-Subir todos los archivos a la raíz del repositorio GitHub. Settings > Pages > Deploy from a branch > `main` > `/ (root)`.
-
-## Limitaciones verificadas
-Modelo y marcador son conceptuales, no cotejados con fotografías reales del Edificio B. Tracking y AR en móvil no se han probado. QR y Code 128 actuales son identificadores, no URL.
+## Verificación / limitaciones
+El archivo `targets.mind` fue revisado estructuralmente. No se verificó que el target corresponda visualmente al marcador PNG ni se probó el tracking en móvil. El modelo es conceptual y no es una réplica exacta comprobada del edificio real.
