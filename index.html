@@ -25,33 +25,46 @@
       font-family: Arial, sans-serif;
     }
 
-    .ar-container {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
     #info {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       color: white;
       text-align: center;
       background: rgba(0, 0, 0, 0.65);
-      z-index: 999;
+      z-index: 1000;
       pointer-events: none;
     }
 
     #info h1 {
+      font-size: 19px;
       margin-bottom: 6px;
-      font-size: 18px;
     }
 
     #status {
       font-size: 14px;
+    }
+
+    #start-button {
+      position: fixed;
+      z-index: 2000;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 17px 25px;
+      border: none;
+      border-radius: 12px;
+      background: #187c43;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #start-button:disabled {
+      background: #555;
     }
   </style>
 </head>
@@ -60,58 +73,102 @@
 
   <div id="info">
     <h1>ICO-AR-001 · Edificio B</h1>
-    <p id="status">Iniciando realidad aumentada...</p>
+    <p id="status">Presiona iniciar para activar la cámara.</p>
   </div>
 
-  <div class="ar-container">
+  <button id="start-button">INICIAR REALIDAD AUMENTADA</button>
 
-    <a-scene
-      mindar-image="
-        imageTargetSrc: ./assets/targets.mind;
-        autoStart: true;
-        maxTrack: 1;
-      "
-      embedded
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false">
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./assets/targets.mind;
+      autoStart: false;
+      maxTrack: 1;
+      uiLoading: no;
+      uiScanning: no;
+      uiError: no;
+    "
+    embedded
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
-      <a-camera
-        position="0 0 0"
-        look-controls="enabled: false">
-      </a-camera>
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
 
-      <a-entity
-        id="target"
-        mindar-image-target="targetIndex: 0">
+    <a-entity
+      id="target"
+      mindar-image-target="targetIndex: 0">
 
-        <a-box
-          position="0 0.1 0"
-          width="0.15"
-          height="0.15"
-          depth="0.15"
-          color="#00FF88">
-        </a-box>
+      <a-box
+        position="0 0.1 0"
+        width="0.15"
+        height="0.15"
+        depth="0.15"
+        color="#00FF88">
+      </a-box>
 
-      </a-entity>
+    </a-entity>
 
-    </a-scene>
-
-  </div>
+  </a-scene>
 
   <script>
-    const status = document.getElementById("status");
     const scene = document.querySelector("a-scene");
+    const startButton = document.getElementById("start-button");
+    const status = document.getElementById("status");
     const target = document.getElementById("target");
+
+    let arSystem = null;
+    let started = false;
+
+    function prepareAR() {
+      arSystem = scene.systems["mindar-image-system"];
+
+      if (!arSystem) {
+        status.textContent = "No se pudo preparar el sistema AR.";
+        return;
+      }
+
+      startButton.addEventListener("click", () => {
+        if (started) return;
+
+        started = true;
+        startButton.disabled = true;
+        startButton.textContent = "INICIANDO...";
+        status.textContent = "Solicitando acceso a la cámara...";
+
+        try {
+          arSystem.start();
+        } catch (error) {
+          console.error(error);
+          status.textContent = "Error al iniciar: " + error.message;
+          startButton.disabled = false;
+          startButton.textContent = "VOLVER A INTENTAR";
+          started = false;
+        }
+      });
+    }
+
+    if (scene.hasLoaded) {
+      prepareAR();
+    } else {
+      scene.addEventListener("loaded", prepareAR, { once: true });
+    }
 
     scene.addEventListener("arReady", () => {
       status.textContent = "Cámara activa. Busca el marcador.";
+      startButton.style.display = "none";
     });
 
     scene.addEventListener("arError", (event) => {
-      console.error("Error de realidad aumentada:", event);
-      status.textContent = "Error al iniciar la cámara.";
+      console.error("Error AR:", event);
+      status.textContent = "No se pudo iniciar la cámara.";
+      startButton.style.display = "block";
+      startButton.disabled = false;
+      startButton.textContent = "VOLVER A INTENTAR";
+      started = false;
     });
 
     target.addEventListener("targetFound", () => {
@@ -119,7 +176,7 @@
     });
 
     target.addEventListener("targetLost", () => {
-      status.textContent = "Marcador perdido. Apunta nuevamente.";
+      status.textContent = "Marcador perdido. Busca nuevamente.";
     });
   </script>
 
