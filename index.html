@@ -1,13 +1,13 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <title>ICO-AR-001 · Edificio B</title>
 
-  <meta name="description" content="Prototipo WebAR del Edificio B del Centro Universitario UAEM Valle de Teotihuacán.">
+  <meta name="description" content="Proyecto de realidad aumentada del Edificio B del Centro Universitario UAEM Valle de Teotihuacán.">
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -20,42 +20,26 @@
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
+      padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #000;
       color: #fff;
-      font-family: system-ui, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
-    /* Visor AR a pantalla completa */
+    /* Escena de realidad aumentada */
     a-scene {
-      position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      overflow: hidden !important;
-    }
-
-    /* Video de la cámara */
-    video.mindar-video {
-      position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      object-fit: cover !important;
-    }
-
-    /* Canvas de realidad aumentada */
-    a-scene canvas {
-      position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
 
     /* Encabezado */
@@ -64,48 +48,60 @@
       z-index: 10;
       top: 0;
       left: 0;
-      right: 0;
+      width: 100%;
       padding: 12px 15px;
       padding-top: calc(12px + env(safe-area-inset-top));
+      text-align: center;
       background: linear-gradient(
         to bottom,
-        rgba(0,0,0,.72),
-        rgba(0,0,0,.25)
+        rgba(0, 0, 0, 0.75),
+        rgba(0, 0, 0, 0.15)
       );
-      text-align: center;
       pointer-events: none;
     }
 
     #intro h1 {
       margin: 0 0 5px;
-      font-size: 1.05rem;
+      font-size: 18px;
+      font-weight: 600;
       color: #a7e8bb;
     }
 
     #intro p {
       margin: 0;
-      font-size: .85rem;
+      font-size: 13px;
+      line-height: 1.4;
     }
 
+    /* Estado de la realidad aumentada */
     #status {
-      margin-top: 6px;
-      font-size: .8rem;
+      margin-top: 7px;
+      font-size: 12px;
+      line-height: 1.4;
       color: #fff;
+    }
+
+    /* Evita interferencias con la cámara */
+    #intro,
+    #status {
+      user-select: none;
+      -webkit-user-select: none;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Encabezado y diagnóstico -->
+  <!-- Información y estado -->
   <div id="intro">
     <h1>ICO-AR-001 · Edificio B</h1>
     <p>Permite el acceso a la cámara y apunta al marcador impreso.</p>
     <div id="status">Preparando realidad aumentada…</div>
   </div>
 
-  <!-- Escena de realidad aumentada -->
+  <!-- Escena AR -->
   <a-scene
+    embedded
     mindar-image="
       imageTargetSrc: ./assets/targets.mind;
       autoStart: true;
@@ -114,13 +110,11 @@
       uiLoading: no;
       uiError: no;
     "
-    embedded
-    color-space="sRGB"
-    renderer="colorManagement: true; physicallyCorrectLights: true"
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
+    device-orientation-permission-ui="enabled: false"
+    renderer="colorManagement: true; physicallyCorrectLights: true">
 
-    <!-- Modelo 3D -->
+    <!-- Recursos -->
     <a-assets>
       <a-asset-item
         id="building"
@@ -128,16 +122,16 @@
       </a-asset-item>
     </a-assets>
 
-    <!-- Cámara -->
+    <!-- Cámara AR -->
     <a-camera
       position="0 0 0"
       look-controls="enabled: false">
     </a-camera>
 
-    <!-- Marcador -->
+    <!-- Target del marcador -->
     <a-entity mindar-image-target="targetIndex: 0">
 
-      <!-- Edificio B -->
+      <!-- Modelo 3D del Edificio B -->
       <a-gltf-model
         id="buildingModel"
         src="#building"
@@ -153,37 +147,47 @@
   <!-- Diagnóstico -->
   <script>
     const scene = document.querySelector("a-scene");
-    const status = document.getElementById("status");
+    const status = document.querySelector("#status");
     const target = document.querySelector("[mindar-image-target]");
     const model = document.querySelector("#buildingModel");
 
+    // Escena inicializada
     scene.addEventListener("loaded", () => {
-      status.textContent = "Escena cargada. Esperando cámara y marcador.";
+      status.textContent = "Escena cargada. Iniciando cámara…";
     });
 
+    // AR listo
     scene.addEventListener("arReady", () => {
       status.textContent = "Cámara activa. Apunta al marcador del Edificio B.";
     });
 
-    scene.addEventListener("arError", () => {
-      status.textContent = "Error al iniciar AR. Revisa el permiso de cámara.";
+    // Error de AR
+    scene.addEventListener("arError", (event) => {
+      console.error("Error de MindAR:", event);
+      status.textContent = "No se pudo iniciar AR. Revisa el permiso de cámara.";
     });
 
+    // Marcador detectado
     target.addEventListener("targetFound", () => {
-      status.textContent = "¡Marcador reconocido! Mostrando Edificio B.";
+      status.textContent = "¡Marcador reconocido! Edificio B detectado.";
+      console.log("Marcador detectado.");
     });
 
+    // Marcador perdido
     target.addEventListener("targetLost", () => {
       status.textContent = "Marcador perdido. Vuelve a apuntar al marcador.";
+      console.log("Marcador perdido.");
     });
 
+    // Modelo cargado
     model.addEventListener("model-loaded", () => {
       console.log("EdificioB.glb cargado correctamente.");
     });
 
+    // Error de carga del modelo
     model.addEventListener("model-error", (event) => {
-      console.error("Error al cargar el modelo 3D:", event);
-      status.textContent = "Error al cargar EdificioB.glb.";
+      console.error("Error al cargar EdificioB.glb:", event);
+      status.textContent = "Error al cargar el edificio 3D.";
     });
   </script>
 
