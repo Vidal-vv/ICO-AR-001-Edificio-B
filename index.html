@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>ICO-AR-001 | Prueba de cámara</title>
+  <title>ICO-AR-001 | Prueba de seguimiento</title>
+
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    * {
+    html, body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -22,90 +22,88 @@
       font-family: Arial, sans-serif;
     }
 
-    #camera {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
-
     #info {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      padding: 20px 15px;
+      padding: 12px;
+      box-sizing: border-box;
       color: white;
-      background: rgba(0, 0, 0, 0.65);
       text-align: center;
-      z-index: 10;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 999;
+      pointer-events: none;
     }
 
     #info h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
+      margin: 0 0 6px;
+      font-size: 18px;
     }
 
     #status {
       font-size: 14px;
-    }
-
-    #start {
-      position: fixed;
-      z-index: 20;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      padding: 16px 24px;
-      border: 0;
-      border-radius: 12px;
-      background: #187c43;
-      color: white;
-      font-size: 17px;
     }
   </style>
 </head>
 
 <body>
 
-  <video id="camera" autoplay playsinline muted></video>
-
   <div id="info">
     <h1>ICO-AR-001 · Edificio B</h1>
-    <p id="status">Cámara sin iniciar</p>
+    <p id="status">Iniciando seguimiento de imagen...</p>
   </div>
 
-  <button id="start">Activar cámara</button>
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./assets/targets.mind;
+      autoStart: true;
+      maxTrack: 1;
+    "
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <!-- Marcador -->
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <!-- Figura de prueba -->
+      <a-box
+        position="0 0.1 0"
+        width="0.15"
+        height="0.15"
+        depth="0.15"
+        color="#00FF88">
+      </a-box>
+
+    </a-entity>
+
+  </a-scene>
 
   <script>
-    const video = document.getElementById("camera");
     const status = document.getElementById("status");
-    const start = document.getElementById("start");
+    const scene = document.querySelector("a-scene");
+    const target = document.querySelector("[mindar-image-target]");
 
-    start.addEventListener("click", async () => {
-      try {
-        status.textContent = "Solicitando cámara...";
+    scene.addEventListener("arReady", () => {
+      status.textContent = "Cámara activa. Busca el marcador.";
+    });
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" }
-          },
-          audio: false
-        });
+    scene.addEventListener("arError", (event) => {
+      console.error("Error de AR:", event);
+      status.textContent = "Error al iniciar realidad aumentada.";
+    });
 
-        video.srcObject = stream;
+    target.addEventListener("targetFound", () => {
+      status.textContent = "¡Marcador reconocido!";
+    });
 
-        await video.play();
-
-        start.style.display = "none";
-        status.textContent = "Cámara activa · Prueba de imagen";
-
-      } catch (error) {
-        status.textContent = "Error de cámara: " + error.message;
-        console.error(error);
-      }
+    target.addEventListener("targetLost", () => {
+      status.textContent = "Marcador perdido. Apunta nuevamente.";
     });
   </script>
 
