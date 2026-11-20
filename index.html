@@ -105,6 +105,15 @@
       embedded
     >
 
+      <!-- Carga del modelo 3D -->
+      <a-assets>
+        <a-asset-item
+          id="edificio-modelo"
+          src="./assets/EdificioB.glb">
+        </a-asset-item>
+      </a-assets>
+
+      <!-- Cámara -->
       <a-camera
         position="0 0 0"
         look-controls="enabled: false"
@@ -113,14 +122,14 @@
       <!-- Marcador del edificio -->
       <a-entity mindar-image-target="targetIndex: 0">
 
-        <!-- Objeto de prueba -->
-        <a-box
-          position="0 0.1 0"
-          width="0.15"
-          height="0.15"
-          depth="0.15"
-          color="#00FF88"
-        ></a-box>
+        <!-- Modelo 3D del Edificio B -->
+        <a-entity
+          id="modelo-edificio"
+          gltf-model="#edificio-modelo"
+          position="0 0 0"
+          rotation="0 0 0"
+          scale="0.1 0.1 0.1"
+        ></a-entity>
 
       </a-entity>
 
@@ -132,8 +141,20 @@
     const startButton = document.querySelector("#start-button");
     const statusText = document.querySelector("#status");
     const scene = document.querySelector("a-scene");
+    const modelo = document.querySelector("#modelo-edificio");
 
     let arStarted = false;
+    let modelLoaded = false;
+
+    modelo.addEventListener("model-loaded", () => {
+      modelLoaded = true;
+      statusText.textContent = "Modelo 3D cargado. Busca el marcador.";
+    });
+
+    modelo.addEventListener("model-error", (event) => {
+      console.error("Error al cargar el modelo:", event);
+      statusText.textContent = "No se pudo cargar el modelo 3D.";
+    });
 
     startButton.addEventListener("click", async () => {
 
@@ -150,7 +171,10 @@
         arStarted = true;
 
         startButton.classList.add("hidden");
-        statusText.textContent = "Cámara activa. Busca el marcador.";
+
+        statusText.textContent = modelLoaded
+          ? "Modelo 3D cargado. Busca el marcador."
+          : "Cámara activa. Cargando modelo 3D...";
 
       } catch (error) {
 
@@ -175,7 +199,7 @@
     });
 
     scene.addEventListener("targetFound", () => {
-      statusText.textContent = "¡Marcador detectado!";
+      statusText.textContent = "¡Edificio B detectado!";
     });
 
     scene.addEventListener("targetLost", () => {
