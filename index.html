@@ -1,10 +1,191 @@
+
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ICO-AR-001 · Edificio B</title><meta name="description" content="Prototipo WebAR del Edificio B del Centro Universitario UAEM Valle de Teotihuacán.">
-<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<style>html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#101712;color:#f2f6f3}#intro{position:fixed;z-index:5;top:0;left:0;right:0;padding:14px 16px;background:#10251bda;text-align:center}#intro h1{font-size:1.1rem;margin:0 0 6px;color:#9be0b1}#intro p{font-size:.9rem;margin:0}#status{margin-top:6px;font-size:.8rem;color:#d8e8dd}</style></head>
-<body><div id="intro"><h1>ICO-AR-001 · Edificio B</h1><p>Permite el acceso a la cámara y apunta al marcador impreso.</p><div id="status">Preparando realidad aumentada…</div></div>
-<a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; autoStart: true; maxTrack: 1; uiScanning: yes; uiLoading: yes; uiError: yes;" embedded color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-<a-assets><a-asset-item id="building" src="./assets/EdificioB.glb"></a-asset-item></a-assets><a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-<a-entity mindar-image-target="targetIndex: 0"><a-gltf-model src="#building" position="0 0 0" rotation="0 0 0" scale="0.25 0.25 0.25"></a-gltf-model></a-entity></a-scene>
-<script>const scene=document.querySelector('a-scene');const status=document.getElementById('status');scene.addEventListener('loaded',()=>status.textContent='Escena cargada. Acepta la cámara y apunta al marcador.');const target=document.querySelector('[mindar-image-target]');target.addEventListener('targetFound',()=>status.textContent='¡Marcador reconocido! Edificio B en realidad aumentada.');target.addEventListener('targetLost',()=>status.textContent='Marcador perdido. Vuelve a apuntar al marcador.');</script></body></html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>ICO-AR-001 · Edificio B</title>
+
+  <meta name="description" content="Prototipo WebAR del Edificio B del Centro Universitario UAEM Valle de Teotihuacán.">
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* Visor AR a pantalla completa */
+    a-scene {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      overflow: hidden !important;
+    }
+
+    /* Video de la cámara */
+    video.mindar-video {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      object-fit: cover !important;
+    }
+
+    /* Canvas de realidad aumentada */
+    a-scene canvas {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
+    /* Encabezado */
+    #intro {
+      position: fixed;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 15px;
+      padding-top: calc(12px + env(safe-area-inset-top));
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,.72),
+        rgba(0,0,0,.25)
+      );
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #intro h1 {
+      margin: 0 0 5px;
+      font-size: 1.05rem;
+      color: #a7e8bb;
+    }
+
+    #intro p {
+      margin: 0;
+      font-size: .85rem;
+    }
+
+    #status {
+      margin-top: 6px;
+      font-size: .8rem;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Encabezado y diagnóstico -->
+  <div id="intro">
+    <h1>ICO-AR-001 · Edificio B</h1>
+    <p>Permite el acceso a la cámara y apunta al marcador impreso.</p>
+    <div id="status">Preparando realidad aumentada…</div>
+  </div>
+
+  <!-- Escena de realidad aumentada -->
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./assets/targets.mind;
+      autoStart: true;
+      maxTrack: 1;
+      uiScanning: no;
+      uiLoading: no;
+      uiError: no;
+    "
+    embedded
+    color-space="sRGB"
+    renderer="colorManagement: true; physicallyCorrectLights: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+
+    <!-- Modelo 3D -->
+    <a-assets>
+      <a-asset-item
+        id="building"
+        src="./assets/EdificioB.glb">
+      </a-asset-item>
+    </a-assets>
+
+    <!-- Cámara -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <!-- Marcador -->
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <!-- Edificio B -->
+      <a-gltf-model
+        id="buildingModel"
+        src="#building"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.25 0.25 0.25">
+      </a-gltf-model>
+
+    </a-entity>
+
+  </a-scene>
+
+  <!-- Diagnóstico -->
+  <script>
+    const scene = document.querySelector("a-scene");
+    const status = document.getElementById("status");
+    const target = document.querySelector("[mindar-image-target]");
+    const model = document.querySelector("#buildingModel");
+
+    scene.addEventListener("loaded", () => {
+      status.textContent = "Escena cargada. Esperando cámara y marcador.";
+    });
+
+    scene.addEventListener("arReady", () => {
+      status.textContent = "Cámara activa. Apunta al marcador del Edificio B.";
+    });
+
+    scene.addEventListener("arError", () => {
+      status.textContent = "Error al iniciar AR. Revisa el permiso de cámara.";
+    });
+
+    target.addEventListener("targetFound", () => {
+      status.textContent = "¡Marcador reconocido! Mostrando Edificio B.";
+    });
+
+    target.addEventListener("targetLost", () => {
+      status.textContent = "Marcador perdido. Vuelve a apuntar al marcador.";
+    });
+
+    model.addEventListener("model-loaded", () => {
+      console.log("EdificioB.glb cargado correctamente.");
+    });
+
+    model.addEventListener("model-error", (event) => {
+      console.error("Error al cargar el modelo 3D:", event);
+      status.textContent = "Error al cargar EdificioB.glb.";
+    });
+  </script>
+
+</body>
+</html>
