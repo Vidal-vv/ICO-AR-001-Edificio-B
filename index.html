@@ -99,7 +99,7 @@
         uiError: no;
       "
       color-space="sRGB"
-      renderer="antialias: false; colorManagement: true; physicallyCorrectLights: false; precision: mediump"
+      renderer="colorManagement: true, physicallyCorrectLights"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
       embedded
@@ -164,12 +164,14 @@
     });
 
     scene.addEventListener("arReady", () => {
-      statusText.textContent = "Realidad aumentada lista. Busca el marcador.";
+      statusText.textContent =
+        "Realidad aumentada lista. Busca el marcador.";
     });
 
     scene.addEventListener("arError", (event) => {
       console.error("Error de realidad aumentada:", event);
-      statusText.textContent = "Error al iniciar la realidad aumentada.";
+      statusText.textContent =
+        "Error al iniciar la realidad aumentada.";
     });
 
     scene.addEventListener("targetFound", () => {
@@ -177,7 +179,8 @@
     });
 
     scene.addEventListener("targetLost", () => {
-      statusText.textContent = "Marcador perdido. Busca nuevamente.";
+      statusText.textContent =
+        "Marcador perdido. Busca nuevamente.";
     });
   </script>
 
